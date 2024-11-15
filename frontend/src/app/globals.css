@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Variables de colores */
+:root {
+  --background: #f0f4f8;
+  --foreground: #171717;
+  --primary: #1a73e8;
+  --secondary: #6b7280;
+  --accent: #2d3748;
+  --light-gray: #e2e8f0;
+  --dark-gray: #4a5568;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #1a202c;
+    --foreground: #e2e8f0;
+    --primary: #3b82f6;
+    --secondary: #9ca3af;
+    --accent: #2d3748;
+    --light-gray: #4a5568;
+    --dark-gray: #718096;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background-color: var(--background);
+  font-family: 'Inter', sans-serif;
+  line-height: 1.6;
+}
+
+/* Estilos para botones */
+button {
+  background-color: var(--primary);
+  color: #fff;
+  padding: 0.5rem 1.5rem;
+  border-radius: 0.25rem;
+  font-weight: 600;
+  transition: background-color 0.2s ease-in-out;
+}
+
+button:hover {
+  background-color: var(--accent);
+}
+
+/* Estilos para la tarjeta y modal */
+.card, .modal {
+  background-color: var(--light-gray);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
