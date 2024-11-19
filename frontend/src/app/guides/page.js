@@ -9,13 +9,18 @@ const GuidesPage = () => {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    setIsClient(true);
+    setIsClient(true); 
     const loadGuides = async () => {
-      const response = await fetchGuides();
-      setGuides(response.data);
+      try {
+        const response = await fetchGuides();
+        setGuides(response.data); 
+      } catch (error) {
+        console.error("Error fetching guides:", error);
+      }
     };
     loadGuides();
   }, []);
+  
 
   if (!isClient) {
     return null;

@@ -1,18 +1,23 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import { fetchGuideById, updateGuide } from '../../../services/guidesService';
+import { useState, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
+import { fetchGuideById, updateGuide } from "../../../services/guidesService";
 
 const EditGuidePage = () => {
-  const [form, setForm] = useState({ cost: '', guide_pdf: '', couriers: '' });
+  const [form, setForm] = useState({ cost: "", guide_pdf: "", couriers: "" });
   const router = useRouter();
-  const { id } = useParams();
+  const { id } = useParams(); // Asegúrate de que useParams esté funcionando correctamente
 
   useEffect(() => {
+    if (!id) return; // Si el id no está disponible, no intenta cargar datos
     const loadGuide = async () => {
-      const response = await fetchGuideById(id);
-      setForm(response.data);
+      try {
+        const response = await fetchGuideById(id);
+        setForm(response.data);
+      } catch (error) {
+        console.error("Error al cargar la guía:", error);
+      }
     };
     loadGuide();
   }, [id]);
@@ -24,12 +29,20 @@ const EditGuidePage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await updateGuide(id, form);
-    router.push('/guides');
+    try {
+      await updateGuide(id, form);
+      router.push("/guides");
+    } catch (error) {
+      console.error("Error al actualizar la guía:", error);
+    }
   };
 
+  if (!form) {
+    return <p className="text-center text-red-500">Cargando datos...</p>;
+  }
+
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-900">
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
         <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Editar Guía</h2>
         <form onSubmit={handleSubmit}>
@@ -65,7 +78,7 @@ const EditGuidePage = () => {
               value={form.couriers}
               onChange={handleChange}
               className="mt-1 w-full p-2 border border-gray-300 rounded"
-              placeholder="1-11"
+              placeholder="Ej: 1-13"
               required
             />
           </label>
