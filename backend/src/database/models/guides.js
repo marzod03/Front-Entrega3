@@ -9,7 +9,8 @@ module.exports = (sequelize, type) => {
             type: type.DOUBLE
         },
         guide_pdf: {
-            type: type.TEXT
+            type: DataTypes.BLOB('long'),
+            allowNull: false,
         },
         date_created: {
             type: type.DATE
