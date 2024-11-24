@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { createGuide } from '../../../services/guidesService';
 
 const CreateGuidePage = () => {
-  const [form, setForm] = useState({ cost: '', guide_pdf: '', couriers: '' });
+  const [form, setForm] = useState({ cost: '', couriers: '' });
+  const [file, setFile] = useState(null);
   const router = useRouter();
 
   const handleChange = (e) => {
@@ -13,9 +14,19 @@ const CreateGuidePage = () => {
     setForm((prevForm) => ({ ...prevForm, [name]: value }));
   };
 
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]); // Guarda el archivo seleccionado
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await createGuide(form);
+
+    const formData = new FormData();
+    formData.append('cost', form.cost);
+    formData.append('couriers', form.couriers);
+    formData.append('guide_pdf', file);
+
+    await createGuide(formData); // Envía FormData al backend
     router.push('/guides');
   };
 
@@ -25,14 +36,12 @@ const CreateGuidePage = () => {
         <h2 className="text-2xl font-bold mb-4 text-center">Agregar Guía</h2>
         <form onSubmit={handleSubmit}>
           <label className="block text-gray-700 mb-2">
-            URL de la Guía
+            Archivo PDF
             <input
-              type="text"
-              name="guide_pdf"
-              value={form.guide_pdf}
-              onChange={handleChange}
+              type="file"
+              accept="application/pdf"
+              onChange={handleFileChange}
               className="mt-1 w-full p-2 border border-gray-300 rounded"
-              placeholder="https://example.com/guia.pdf"
             />
           </label>
           <label className="block text-gray-700 mb-2">

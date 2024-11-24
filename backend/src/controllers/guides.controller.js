@@ -1,6 +1,7 @@
 const {Guides} = require('../database/db');
 const config = require('../middleware/multerConfig')
 const path = require('path')
+const fs = require('fs');
 
 //POST
 const crearGuia = async(req, res) => {
@@ -30,15 +31,39 @@ const getTodasGuias = async(req, res) => {
     }
 };
 
-const getGuiaId = async(req, res) =>{
-    try{
-        const guide = await Guides.findByPk(req.params.id);
-        res.status(200).json(guide)
+const getGuiaId = async (req, res) => {
+    try {
+      // Buscar la guía por ID
+      const guide = await Guides.findByPk(req.params.id);
+  
+      // Verificar si la guía existe y si tiene un archivo PDF
+      if (!guide || !guide.guide_pdf) {
+        return res.status(404).json({ error: 'Guía no encontrada o archivo PDF no disponible' });
+      }
+  
+      // Obtener los datos binarios del PDF
+      const pdfData = guide.guide_pdf; // Aquí se encuentran los datos binarios del PDF
+  
+      // Crear el objeto de la guía con los datos excluyendo el PDF
+      const guideData = {
+        id: guide.id,
+        cost: guide.cost,
+        couriers: guide.couriers,
+        date_created: guide.date_created,
+        // Aquí puedes agregar más propiedades si es necesario
+      };
+  
+      // Responder con el objeto JSON de la guía y el archivo PDF en base64
+      res.status(200).json({
+        guide: guideData, // Los datos de la guía (JSON)
+        guide_pdf: pdfData.toString('base64'), // El PDF en formato Base64
+      });
+  
     } catch (error) {
-        console.error("Error al obtener guia")
-        res.status(500).json({error: "Error al obtener todas las guias"})
+      console.error("Error al obtener la guía", error);
+      res.status(500).json({ error: "Error al obtener la guía" });
     }
-};
+  };
 
 //UPDATE
 const actualizarGuia = async(req,res) => {

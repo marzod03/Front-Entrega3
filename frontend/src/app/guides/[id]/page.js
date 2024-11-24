@@ -5,16 +5,18 @@ import { useRouter, useParams } from "next/navigation";
 import { fetchGuideById, updateGuide } from "../../../services/guidesService";
 
 const EditGuidePage = () => {
-  const [form, setForm] = useState({ cost: "", guide_pdf: "", couriers: "" });
+  const [form, setForm] = useState({ cost: "", couriers: "" });
+  const [file, setFile] = useState(null);
   const router = useRouter();
-  const { id } = useParams(); // Asegúrate de que useParams esté funcionando correctamente
+  const { id } = useParams();
 
   useEffect(() => {
-    if (!id) return; // Si el id no está disponible, no intenta cargar datos
+    if (!id) return;
     const loadGuide = async () => {
       try {
         const response = await fetchGuideById(id);
-        setForm(response.data);
+        const { cost, couriers } = response.data;
+        setForm({ cost, couriers });
       } catch (error) {
         console.error("Error al cargar la guía:", error);
       }
@@ -27,10 +29,22 @@ const EditGuidePage = () => {
     setForm((prevForm) => ({ ...prevForm, [name]: value }));
   };
 
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]); // Guarda el archivo seleccionado
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const formData = new FormData();
+    formData.append("cost", form.cost);
+    formData.append("couriers", form.couriers);
+    if (file) {
+      formData.append("guide_pdf", file); // Agrega el archivo si se seleccionó
+    }
+
     try {
-      await updateGuide(id, form);
+      await updateGuide(id, formData); // Envía el formulario como FormData
       router.push("/guides");
     } catch (error) {
       console.error("Error al actualizar la guía:", error);
@@ -59,16 +73,18 @@ const EditGuidePage = () => {
             />
           </label>
           <label className="block text-gray-700 mb-2">
-            URL del PDF
+            Archivo PDF (opcional)
             <input
-              type="text"
-              name="guide_pdf"
-              value={form.guide_pdf}
-              onChange={handleChange}
+              type="file"
+              accept="application/pdf"
+              onChange={handleFileChange}
               className="mt-1 w-full p-2 border border-gray-300 rounded"
-              placeholder="https://example.com/pdf/guide.pdf"
-              required
             />
+            {file && (
+              <p className="text-sm text-gray-600 mt-2">
+                Archivo seleccionado: <span className="font-medium">{file.name}</span>
+              </p>
+            )}
           </label>
           <label className="block text-gray-700 mb-2">
             Paquetería
@@ -78,7 +94,7 @@ const EditGuidePage = () => {
               value={form.couriers}
               onChange={handleChange}
               className="mt-1 w-full p-2 border border-gray-300 rounded"
-              placeholder="Ej: 1-13"
+              placeholder="Ej: Fedex"
               required
             />
           </label>

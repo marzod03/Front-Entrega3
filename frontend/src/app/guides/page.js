@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { fetchGuides, deleteGuide } from '../../services/guidesService';
+import { fetchGuides, deleteGuide, fetchGuideById } from '../../services/guidesService';
 import Link from 'next/link';
 
 const GuidesPage = () => {
@@ -9,18 +9,17 @@ const GuidesPage = () => {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    setIsClient(true); 
+    setIsClient(true);
     const loadGuides = async () => {
       try {
         const response = await fetchGuides();
-        setGuides(response.data); 
+        setGuides(response.data);
       } catch (error) {
         console.error("Error fetching guides:", error);
       }
     };
     loadGuides();
   }, []);
-  
 
   if (!isClient) {
     return null;
@@ -31,6 +30,18 @@ const GuidesPage = () => {
       await deleteGuide(id);
       setGuides(guides.filter((guide) => guide.id !== id));
     }
+  };
+
+  const downloadPDF = async (id) => {
+    
+    const response = await fetchGuideById(id); // Ajusta la función en guidesService para recibir el PDF
+    const blob = new Blob([response.data], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `guide-${id}.pdf`;
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -49,7 +60,7 @@ const GuidesPage = () => {
           <thead className="bg-gray-100 text-gray-600 uppercase text-sm leading-normal">
             <tr>
               <th className="py-3 px-6 text-left font-semibold">Costo</th>
-              <th className="py-3 px-6 text-left font-semibold">PDF (URL)</th>
+              <th className="py-3 px-6 text-left font-semibold">PDF</th>
               <th className="py-3 px-6 text-left font-semibold">Courier</th>
               <th className="py-3 px-6 text-center font-semibold">Modificar</th>
             </tr>
@@ -59,14 +70,12 @@ const GuidesPage = () => {
               <tr key={guide.id} className="border-b border-gray-200 hover:bg-gray-100">
                 <td className="py-3 px-6 text-left font-medium text-gray-900">${guide.cost}</td>
                 <td className="py-3 px-6 text-left">
-                  <a
-                    href={guide.guide_pdf}
+                  <button
+                    onClick={() => downloadPDF(guide.id)}
                     className="text-blue-500 hover:text-blue-700 underline transition-all duration-300"
-                    target="_blank"
-                    rel="noopener noreferrer"
                   >
-                    Ver PDF
-                  </a>
+                    Descargar PDF
+                  </button>
                 </td>
                 <td className="py-3 px-6 text-left font-medium text-gray-900">{guide.couriers}</td>
                 <td className="py-3 px-6 text-center flex justify-center space-x-2">
